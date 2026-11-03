@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Escape Room - The Lost Treasure</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: white;
+  background: linear-gradient(135deg, #10152f, #25204b);
+  min-height: 100vh;
+  text-align: center;
+}
+
+header {
+  padding: 22px 12px;
+  background: #171d3d;
+  border-bottom: 3px solid #f5c451;
+}
+
+h1 {
+  color: #ffd166;
+  margin: 5px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background: #ffd166;
+  color: #222;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.info {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 12px;
+}
+
+.panel {
+  background: #242b50;
+  padding: 12px 20px;
+  border-radius: 12px;
+}
+
+#game {
+  max-width: 850px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.room {
+  display: none;
+  background: #30385e;
+  border: 2px solid #ffd166;
+  border-radius: 18px;
+  padding: 25px 15px;
+  min-height: 320px;
+}
+
+.room.active {
+  display: block;
+  animation: appear 0.5s;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.objects {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.object {
+  background: #414b79;
+  border: 2px solid #7181b9;
+  border-radius: 15px;
+  padding: 20px 12px;
+  min-width: 125px;
+  cursor: pointer;
+  font-size: 35px;
+}
+
+.object p {
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+.object:hover {
+  background: #59699e;
+  transform: scale(1.05);
+}
+
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000b;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+
+.modal-content {
+  background: #252d52;
+  border: 2px solid #ffd166;
+  border-radius: 18px;
+  padding: 25px;
+  width: 100%;
+  max-width: 420px;
+}
+
+input {
+  padding: 12px;
+  width: 85%;
+  border-radius: 8px;
+  border: none;
+  margin: 12px;
+  font-size: 18px;
+  text-align: center;
+}
+
+#message {
+  min-height: 25px;
+  color: #ffd166;
+}
+
+#timer {
+  color: #ff8585;
+  font-weight: bold;
+}
+
+#inventory {
+  background: #171d3d;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+#ending {
+  display: none;
+  padding: 35px 15px;
+  background: #30385e;
+  border: 2px solid #ffd166;
+  border-radius: 18px;
+}
+
+footer {
+  padding: 20px;
+  color: #c2c8e4;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🔐 MATH ESCAPE ROOM</h1>
+  <p>THE LOST TREASURE</p>
+  <button onclick="toggleMusic()" id="musicButton">
+    🎵 Musik: ON
+  </button>
+</header>
+
+<div class="info">
+  <div class="panel">⭐ Skor: <span id="score">0</span></div>
+  <div class="panel">🚪 Ruangan: <span id="level">1</span>/4</div>
+  <div class="panel">⏰ Waktu: <span id="timer">60</span> detik</div>
+</div>
+
+<main id="game">
+
+  <div id="room1" class="room active">
+    <h2>🏫 Ruang Kelas Misterius</h2>
+    <p>Temukan petunjuk untuk membuka pintu keluar!</p>
+    <div class="objects">
+      <div class="object" onclick="openPuzzle(1)">
+        📚<p>Buku Matematika</p>
+      </div>
+      <div class="object" onclick="openPuzzle(1)">
+        🧮<p>Papan Hitung</p>
+      </div>
+      <div class="object" onclick="openPuzzle(1)">
+        🚪<p>Pintu Rahasia</p>
+      </div>
+    </div>
+    <p id="hint1">Klik salah satu objek untuk menemukan tantangan.</p>
+  </div>
+
+  <div id="room2" class="room">
+    <h2>📚 Perpustakaan Rahasia</h2>
+    <p>Temukan angka yang tersembunyi dalam persamaan!</p>
+    <div class="objects">
+      <div class="object" onclick="openPuzzle(2)">
+        📖<p>Buku Aljabar</p>
+      </div>
+      <div class="object" onclick="openPuzzle(2)">
+        🗄️<p>Lemari Buku</p>
+      </div>
+      <div class="object" onclick="openPuzzle(2)">
+        🔑<p>Kunci Rahasia</p>
+      </div>
+    </div>
+    <p id="hint2">Klik objek untuk membuka tantangan.</p>
+  </div>
+
+  <div id="room3" class="room">
+    <h2>🧪 Laboratorium Geometri</h2>
+    <p>Gunakan kemampuan berhitungmu untuk menemukan kode!</p>
+    <div class="objects">
+      <div class="object" onclick="openPuzzle(3)">
+        📐<p>Penggaris</p>
+      </div>
+      <div class="object" onclick="openPuzzle(3)">
+        📦<p>Kotak Misteri</p>
+      </div>
+      <div class="object" onclick="openPuzzle(3)">
+        🚪<p>Pintu Lab</p>
+      </div>
+    </div>
+    <p id="hint3">Klik objek untuk membuka tantangan.</p>
+  </div>
+
+  <div id="room4" class="room">
+    <h2>🏛️ Kuil Harta Karun</h2>
+    <p>Ini tantangan terakhir. Pecahkan teka-teki pecahan!</p>
+    <div class="objects">
+      <div class="object" onclick="openPuzzle(4)">
+        💎<p>Batu Permata</p>
+      </div>
+      <div class="object" onclick="openPuzzle(4)">
+        🏺<p>Guci Kuno</p>
+      </div>
+      <div class="object" onclick="openPuzzle(4)">
+        🗝️<p>Pintu Harta</p>
+      </div>
+    </div>
+    <p id="hint4">Selesaikan tantangan untuk menemukan harta karun.</p>
+  </div>
+
+  <div id="inventory">
+    🎒 <b>Jurnal Petualangan:</b>
+    <span id="journal">Belum ada petunjuk ditemukan.</span>
+  </div>
+
+  <div id="ending">
+    <h1>🏆 SELAMAT!</h1>
+    <h2>Kamu Berhasil Menemukan Harta Karun!</h2>
+    <p>Semua tantangan matematika berhasil diselesaikan.</p>
+    <h2>⭐ Skor Akhir: <span id="finalScore"></span></h2>
+    <button onclick="restartGame()">🔄 Main Lagi</button>
+  </div>
+
+</main>
+
+<div id="modal">
+  <div class="modal-content">
+    <h2 id="puzzleTitle">Tantangan Matematika</h2>
+    <p id="question"></p>
+    <p>Masukkan jawabanmu:</p>
+    <input type="number" id="answer" placeholder="Jawaban">
+    <p id="message"></p>
+    <button onclick="checkAnswer()">Periksa Jawaban</button>
+    <button onclick="closePuzzle()">Tutup</button>
+  </div>
+</div>
+
+<footer>
+  Math Escape Room | Belajar Matematika Sambil Bertualang
+</footer>
+
+<script>
+let score = 0;
+let currentRoom = 1;
+let solved = [false, false, false, false];
+let activePuzzle = 0;
+let timeLeft = 60;
+let timerInterval;
+let musicOn = true;
+let musicInterval;
+let audioContext;
+
+const puzzles = {
+  1: {
+    title: "Tantangan Operasi Hitung",
+    question: "Berapakah hasil dari 12 × 8 + 4?",
+    answer: 100
+  },
+  2: {
+    title: "Tantangan Aljabar",
+    question: "Jika 3x + 15 = 90, berapakah nilai x?",
+    answer: 25
+  },
+  3: {
+    title: "Tantangan Geometri",
+    question: "Sebuah persegi panjang memiliki panjang 12 cm dan lebar 8 cm. Berapa luasnya?",
+    answer: 96
+  },
+  4: {
+    title: "Tantangan Pecahan",
+    question: "Berapakah hasil dari 3/4 × 80?",
+    answer: 60
+  }
+};
+
+// SISTEM SUARA
+function sound(frequency, duration = 200) {
+  if (!musicOn) return;
+
+  audioContext = audioContext ||
+    new (window.AudioContext || window.webkitAudioContext)();
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+
+  oscillator.frequency.value = frequency;
+  gain.gain.setValueAtTime(0.07, audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    audioContext.currentTime + duration / 1000
+  );
+
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + duration / 1000);
+}
+
+function startMusic() {
+  clearInterval(musicInterval);
+  const notes = [262, 330, 392, 330, 294, 349, 440, 349];
+  let i = 0;
+
+  musicInterval = setInterval(() => {
+    if (musicOn) sound(notes[i++ % notes.length], 350);
+  }, 500);
+}
+
+function toggleMusic() {
+  musicOn = !musicOn;
+
+  document.getElementById("musicButton").innerText =
+    musicOn ? "🎵 Musik: ON" : "🔇 Musik: OFF";
+
+  if (musicOn) {
+    startMusic();
+    sound(500);
+  } else {
+    clearInterval(musicInterval);
+  }
+}
+
+function correctSound() {
+  [523, 659, 784].forEach((n, i) =>
+    setTimeout(() => sound(n, 250), i * 180)
+  );
+}
+
+function wrongSound() {
+  sound(180, 400);
+}
+
+function winSound() {
+  [523, 659, 784, 1047].forEach((n, i) =>
+    setTimeout(() => sound(n, 350), i * 220)
+  );
+}
+
+// MULAI PERMAINAN
+document.addEventListener("click", function firstClick() {
+  if (musicOn) startMusic();
+  document.removeEventListener("click", firstClick);
+}, { once: true });
+
+// MEMBUKA TANTANGAN
+function openPuzzle(room) {
+  if (solved[room - 1]) {
+    document.getElementById("hint" + room).innerText =
+      "Tantangan ini sudah kamu selesaikan!";
+    sound(450);
+    return;
+  }
+
+  activePuzzle = room;
+  const puzzle = puzzles[room];
+
+  document.getElementById("puzzleTitle").innerText = puzzle.title;
+  document.getElementById("question").innerText = puzzle.question;
+  document.getElementById("answer").value = "";
+  document.getElementById("message").innerText = "";
+
+  document.getElementById("modal").style.display = "flex";
+  sound(400);
+  document.getElementById("answer").focus();
+}
+
+// MEMERIKSA JAWABAN
+function checkAnswer() {
+  const answer = document.getElementById("answer").value;
+  const message = document.getElementById("message");
+
+  if (answer === "") {
+    message.innerText = "Masukkan jawaban terlebih dahulu!";
+    return;
+  }
+
+  if (Number(answer) === puzzles[activePuzzle].answer) {
+    solved[activePuzzle - 1] = true;
+    score += 25;
+
+    document.getElementById("score").innerText = score;
+    document.getElementById("journal").innerText =
+      "Petunjuk " + activePuzzle + " berhasil ditemukan!";
+
+    document.getElementById("hint" + activePuzzle).innerText =
+      "✅ Tantangan berhasil diselesaikan!";
+
+    message.innerText = "🎉 Jawaban benar! Kode pintu ditemukan.";
+    correctSound();
+
+    setTimeout(() => {
+      closePuzzle();
+      nextRoom();
+    }, 1200);
+
+  } else {
+    message.innerText = "❌ Jawaban belum tepat. Coba lagi!";
+    wrongSound();
+  }
+}
+
+// MENUTUP TANTANGAN
+function closePuzzle() {
+  document.getElementById("modal").style.display = "none";
+}
+
+// PINDAH RUANGAN
+function nextRoom() {
+  if (currentRoom === 4) {
+    finishGame();
+    return;
+  }
+
+  document.getElementById("room" + currentRoom)
+    .classList.remove("active");
+
+  currentRoom++;
+
+  document.getElementById("room" + currentRoom)
+    .classList.add("active");
+
+  document.getElementById("level").innerText = currentRoom;
+
+  timeLeft = 60;
+  document.getElementById("timer").innerText = timeLeft;
+}
+
+// HITUNG MUNDUR
+function startTimer() {
+  clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    if (document.getElementById("ending").style.display === "block") {
+      clearInterval(timerInterval);
+      return;
+    }
+
+    if (timeLeft > 0) {
+      timeLeft--;
+      document.getElementById("timer").innerText = timeLeft;
+
+      if (timeLeft <= 10) sound(200, 100);
+    } else {
+      clearInterval(timerInterval);
+      document.getElementById("timer").innerText = "Waktu habis!";
+      document.getElementById("message").innerText =
+        "Waktu tantangan habis. Kamu bisa mencoba lagi!";
+    }
+  }, 1000);
+}
+
+// MENYELESAIKAN PERMAINAN
+function finishGame() {
+  document.getElementById("room4").classList.remove("active");
+  document.getElementById("ending").style.display = "block";
+  document.getElementById("finalScore").innerText = score;
+
+  clearInterval(timerInterval);
+  winSound();
+}
+
+// MENGULANG PERMAINAN
+function restartGame() {
+  score = 0;
+  currentRoom = 1;
+  solved = [false, false, false, false];
+  timeLeft = 60;
+
+  document.getElementById("score").innerText = 0;
+  document.getElementById("level").innerText = 1;
+  document.getElementById("timer").innerText = 60;
+  document.getElementById("journal").innerText =
+    "Belum ada petunjuk ditemukan.";
+
+  document.getElementById("ending").style.display = "none";
+
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById("room" + i).classList.remove("active");
+    document.getElementById("hint" + i).innerText =
+      "Klik objek untuk membuka tantangan.";
+  }
+
+  document.getElementById("room1").classList.add("active");
+  startTimer();
+  sound(500);
+}
+
+startTimer();
+</script>
+
+</body>
+</html>
